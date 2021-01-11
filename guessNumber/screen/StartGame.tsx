@@ -1,5 +1,16 @@
-import React, { useState } from 'react';
-import { Alert, Button, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  Button,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native';
 
 import colors from "../constants/colors"
 import Input from '../components/Input'
@@ -14,10 +25,23 @@ const StartGame: React.FC<OwnProps> = ({ onStartGameHandler }) => {
   const [enteredValue, setEnteredValue] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number>(null);
+  const [buttonWidth, setButtonWidth] = useState(Dimensions.get('window').width / 4)
 
   const numberInputHandler = (text: string) => {
     setEnteredValue(text.replace(/[^0-9]/g, ''))
   }
+
+  const updateButtonWidth = () => {
+    setButtonWidth(Dimensions.get('window').width / 4);
+  }
+
+  useEffect(() => {
+    Dimensions.addEventListener('change', updateButtonWidth)
+    return () => {
+      Dimensions.removeEventListener('change', updateButtonWidth)
+    }
+  },[])
+
 
   const resetInputHandler = () => {
     setEnteredValue('')
@@ -53,35 +77,39 @@ const StartGame: React.FC<OwnProps> = ({ onStartGameHandler }) => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={() => {
-      Keyboard.dismiss()
-    }}>
-      <View style={styles.screen}>
-        <Text style={styles.title}>Start a New game!</Text>
-        <Card otherStyles={styles.inputContainer}>
-          <Text>Select a Number</Text>
-          <Input
-            otherStyles={styles.input}
-            blurOnSubmit
-            autoCapitalize='none'
-            autoCorrect={false}
-            keyboardType='number-pad'
-            maxLength={2}
-            value={enteredValue}
-            onChangeText={numberInputHandler}
-          />
-          <View style={styles.actionContainer}>
-            <View style={styles.button}>
-              <Button title='Reset' onPress={resetInputHandler} color={colors.accent} />
-            </View>
-            <View style={styles.button}>
-              <Button title='Confirm' onPress={confirmButtonHandler} color={colors.primary} />
-            </View>
+    <ScrollView>
+      <KeyboardAvoidingView behavior="padding">
+        <TouchableWithoutFeedback onPress={() => {
+          Keyboard.dismiss()
+        }}>
+          <View style={styles.screen}>
+            <Text style={styles.title}>Start a New game!</Text>
+            <Card otherStyles={styles.inputContainer}>
+              <Text>Select a Number</Text>
+              <Input
+                otherStyles={styles.input}
+                blurOnSubmit
+                autoCapitalize='none'
+                autoCorrect={false}
+                keyboardType='number-pad'
+                maxLength={2}
+                value={enteredValue}
+                onChangeText={numberInputHandler}
+              />
+              <View style={styles.actionContainer}>
+                <View style={{ width: buttonWidth }}>
+                  <Button title='Reset' onPress={resetInputHandler} color={colors.accent} />
+                </View>
+                <View style={{ width: buttonWidth }}>
+                  <Button title='Confirm' onPress={confirmButtonHandler} color={colors.primary} />
+                </View>
+              </View>
+            </Card>
+            {confirmedOutput}
           </View>
-        </Card>
-        {confirmedOutput}
-      </View>
-    </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 };
 
@@ -97,8 +125,9 @@ const styles = StyleSheet.create({
     fontFamily: 'open-sans-bold'
   },
   inputContainer: {
-    width: 300,
-    maxWidth: '80%',
+    width: '80%',
+    minWidth: 300,
+    maxWidth: '90%',
     alignItems: 'center',
   },
   input: {
@@ -110,9 +139,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 15
   },
-  button: {
-    width: 100
-  },
+  // button: {
+  //   width: Dimensions.get('window').width / 4,
+  // },
   summaryContainer: {
     marginTop: 20,
     alignItems: 'center'

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'
 
 import defaultStyles from '../constants/default-styles';
@@ -38,8 +38,21 @@ const GameScreen: React.FC<OwnProps> = ({ userChoice, onGameOverHandler }) => {
   const initialGuess = generateRandomBetween(min.current, max.current, userChoice)
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
   const [pastGuesses, setPastGuesses] = useState<number[]>([initialGuess]);
+  const [deviceWidth, setDeviceWidth] = useState(Dimensions.get('window').width)
+  const [deviceHeight, setDeviceHeight] = useState(Dimensions.get('window').height)
 
 
+  useEffect(() => {
+    const updateLayout = () => {
+      setDeviceHeight(Dimensions.get('window').height)
+      setDeviceWidth(Dimensions.get('window').width)
+    }
+    Dimensions.addEventListener('change', updateLayout)
+    return () => {
+      Dimensions.removeEventListener('change', updateLayout)
+
+    }
+  }, [])
   useEffect(() => {
     if (currentGuess === userChoice) {
       Alert.alert('win');
@@ -62,6 +75,30 @@ const GameScreen: React.FC<OwnProps> = ({ userChoice, onGameOverHandler }) => {
     setCurrentGuess(nextNumber);
   }
 
+  let listContainerStyles = styles.listContainer;
+  if (deviceWidth < 300) {
+    listContainerStyles = styles.listContainerBig
+  }
+
+  if (deviceHeight< 500) {
+    return (
+      <View style={styles.screen}>
+        <Text style={defaultStyles.bodyText}>Opponent's Guess</Text>
+        <View style={styles.controls}><BaseButton onPress={nextGuessHandler.bind(null, 'lower')}> <Ionicons
+          name="md-remove" size={24}
+          color="#fff" /></BaseButton>
+          <NumberContainer>{currentGuess}</NumberContainer>
+          <BaseButton onPress={nextGuessHandler.bind(null, 'greater')}><Ionicons name="md-add" size={24}
+                                                                                 color="#fff" /></BaseButton></View>
+        <View style={listContainerStyles}>
+          <ScrollView contentContainerStyle={styles.list}>
+            {pastGuesses.map((guess, index, arr) => renderListItem(guess, arr.length - index))}
+          </ScrollView>
+        </View>
+      </View>
+    )
+  }
+
   return (
     <View style={styles.screen}>
       <Text style={defaultStyles.bodyText}>Opponent's Guess</Text>
@@ -71,7 +108,7 @@ const GameScreen: React.FC<OwnProps> = ({ userChoice, onGameOverHandler }) => {
         <BaseButton onPress={nextGuessHandler.bind(null, 'greater')}><Ionicons name="md-add" size={24}
                                                                                color="#fff" /></BaseButton>
       </Card>
-      <View style={styles.listContainer}>
+      <View style={listContainerStyles}>
         <ScrollView contentContainerStyle={styles.list}>
           {pastGuesses.map((guess, index, arr) => renderListItem(guess, arr.length - index))}
         </ScrollView>
@@ -89,11 +126,21 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 20,
+    marginTop: Dimensions.get('window').height > 600 ? 20 : 5,
     width: 400,
     maxWidth: '90%'
   },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '80%',
+    alignItems: 'center'
+  },
   listContainer: {
+    width: '60%',
+    flex: 1
+  },
+  listContainerBig: {
     width: '80%',
     flex: 1
   },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import DefaultStyles from '../constants/default-styles';
 import Colors from '../constants/colors'
@@ -12,19 +12,21 @@ type OwnProps = {
 }
 const GameOver: React.FC<OwnProps> = ({ numberOfRounds, userNumber, configureNewGameHandler }) => {
   return (
-    <View style={styles.screen}>
-      <Text style={DefaultStyles.title}>Game is over</Text>
-      <View style={styles.imageContainer}>
-        <Image style={styles.image} source={require('../assets/success.png')} />
+    <ScrollView>
+      <View style={styles.screen}>
+        <Text style={DefaultStyles.title}>Game is over</Text>
+        <View style={styles.imageContainer}>
+          <Image style={styles.image} source={require('../assets/success.png')} />
+        </View>
+        <View style={styles.resultContainer}>
+          <Text style={{ ...DefaultStyles.bodyText, ...styles.resultText }}> Number of rounds:
+            <Text style={styles.highlight}> {numberOfRounds}</Text> Number was:
+            <Text style={styles.highlight}> {userNumber}</Text>
+          </Text>
+        </View>
+        <BaseButton onPress={configureNewGameHandler}>NEW GAME</BaseButton>
       </View>
-      <View style={styles.resultContainer}>
-        <Text style={{ ...DefaultStyles.bodyText, ...styles.resultText }}> Number of rounds:
-          <Text style={styles.highlight}> {numberOfRounds}</Text> Number was:
-          <Text style={styles.highlight}> {userNumber}</Text>
-        </Text>
-      </View>
-      <BaseButton onPress={configureNewGameHandler}>NEW GAME</BaseButton>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -32,23 +34,24 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingVertical: 10,
   },
   imageContainer: {
-    borderRadius: 150,
+    borderRadius: Dimensions.get('window').width * .7 / 2,
     borderWidth: 3,
     borderColor: 'black',
-    width: 300,
-    height: 300,
+    width: Dimensions.get('window').width * .7,
+    height: Dimensions.get('window').width * .7,
     overflow: 'hidden',
-    marginVertical: 30
+    marginVertical: Dimensions.get('window').height / 30
   },
   image: {
     width: '100%',
     height: '100%'
   },
   resultContainer: {
-    marginHorizontal: 10
+    marginHorizontal: Dimensions.get('window').height / 40
   },
   resultText: {
     textAlign: 'center'
